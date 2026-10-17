@@ -12,6 +12,12 @@ the SDK recipe index** — same discipline as the sibling packages.
   (upstream's supervisor model); StartOS containers can't get one. Upstream's
   `packages/adapters/src/none-sandbox.ts` boots fine without computers.
   Remote providers (e2b/daytona/box) stay in-app, per user.
+- **Neither browserless nor webtop substitutes for bot computers.** Upstream's
+  own computer image already IS a desktop-in-container (Xvfb+fluxbox+noVNC+
+  Chromium, infra/sandboxes/computer/Dockerfile) driven via rakazo's supervisor
+  control-plane; browser automation is CDP to that computer's own Chrome
+  (BROWSER_PROVIDER accepts only computer|fake|emulator — no external-browser
+  seam). Asked 2026-10-17, answered with source reads; don't re-explore.
 - **No supervisor daemon** — only meaningful for provider=docker.
 - **worker env deliberately blanks** `BETTER_AUTH_SECRET`/`SCREEN_PROXY_SECRET`:
   that mirrors upstream compose (environment overrides env_file), not a bug.
