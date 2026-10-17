@@ -9,10 +9,16 @@ export const seedFiles = sdk.setupOnInit(async (effects, kind) => {
 
   await storeJson.merge(effects, {
     pgPassword: utils.getDefaultString({ charset: 'a-z,A-Z,0-9', len: 22 }),
-    betterAuthSecret: utils.getDefaultString({ charset: 'a-z,A-Z,0-9', len: 40 }),
+    betterAuthSecret: utils.getDefaultString({
+      charset: 'a-z,A-Z,0-9',
+      len: 40,
+    }),
     // 32 random bytes as hex, what upstream's env example expects.
     encryptionKey: utils.getDefaultString({ charset: '0-9,a-f', len: 64 }),
-    screenProxySecret: utils.getDefaultString({ charset: 'a-z,A-Z,0-9', len: 40 }),
+    screenProxySecret: utils.getDefaultString({
+      charset: 'a-z,A-Z,0-9',
+      len: 40,
+    }),
     signupsEnabled: true,
   })
 

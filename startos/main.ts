@@ -1,7 +1,13 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
-import { API_PORT, POSTGRES_DB, POSTGRES_PATH, POSTGRES_USER, WEB_PORT } from './utils'
+import {
+  API_PORT,
+  POSTGRES_DB,
+  POSTGRES_PATH,
+  POSTGRES_USER,
+  WEB_PORT,
+} from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting Rakazo'))
@@ -229,7 +235,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
         ready: {
           display: null, // internal worker, no port of its own
           fn: async () => {
-            const result = await workerSub.exec(['pgrep', '-f', '@rakazo/worker'])
+            const result = await workerSub.exec([
+              'pgrep',
+              '-f',
+              '@rakazo/worker',
+            ])
             return result.exitCode === 0
               ? { result: 'success', message: i18n('Worker is running') }
               : { result: 'failure', message: i18n('Worker is not running') }

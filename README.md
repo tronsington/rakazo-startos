@@ -15,13 +15,13 @@ make arm        # rakazo_aarch64.s9pk (upstream publishes both)
 
 ## What this package is
 
-| | |
-| --- | --- |
-| Upstream pin | `ghcr.io/elie222/rakazo/app` = **v0.2.0** / commit `f10b4ffd`, digest `sha256:8b4fd589…` (index, amd64+arm64) |
-| Sidecars | `postgres:16@sha256:e17e8606…` (upstream's own compose pin), `busybox:1@sha256:fd7dc986…` for the one chown oneshot |
-| Interface | one HTTP interface on port 5173 (web UI; same-origin proxies `/api`, `/rpc`) |
-| Secrets | `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `ENCRYPTION_KEY`, `SCREEN_PROXY_SECRET` — generated at install, never re-rolled |
-| Daemons | postgres → (chown-data oneshot) → api (migrate deploy → serve) → worker, web |
+|              |                                                                                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Upstream pin | `ghcr.io/elie222/rakazo/app` = **v0.2.0** / commit `f10b4ffd`, digest `sha256:8b4fd589…` (index, amd64+arm64)              |
+| Sidecars     | `postgres:16@sha256:e17e8606…` (upstream's own compose pin), `busybox:1@sha256:fd7dc986…` for the one chown oneshot        |
+| Interface    | one HTTP interface on port 5173 (web UI; same-origin proxies `/api`, `/rpc`)                                               |
+| Secrets      | `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `ENCRYPTION_KEY`, `SCREEN_PROXY_SECRET` — generated at install, never re-rolled |
+| Daemons      | postgres → (chown-data oneshot) → api (migrate deploy → serve) → worker, web                                               |
 
 ## v1 scope: no bot computers
 

@@ -1,9 +1,14 @@
 export const short = {
-  en_US: 'Persistent AI teammates with memory, schedules and credentials — self-hosted',
-  es_ES: 'Compañeros de IA persistentes con memoria, programaciones y credenciales — autoalojados',
-  de_DE: 'Persistente KI-Teammitglieder mit Gedächtnis, Zeitplänen und Zugangsdaten — selbst gehostet',
-  pl_PL: 'Trwali członkowie zespołu AI z pamięcią, harmonogramami i poświadczeniami — self-hosted',
-  fr_FR: 'Coéquipiers IA persistants avec mémoire, planifications et identifiants — auto-hébergé',
+  en_US:
+    'Persistent AI teammates with memory, schedules and credentials — self-hosted',
+  es_ES:
+    'Compañeros de IA persistentes con memoria, programaciones y credenciales — autoalojados',
+  de_DE:
+    'Persistente KI-Teammitglieder mit Gedächtnis, Zeitplänen und Zugangsdaten — selbst gehostet',
+  pl_PL:
+    'Trwali członkowie zespołu AI z pamięcią, harmonogramami i poświadczeniami — self-hosted',
+  fr_FR:
+    'Coéquipiers IA persistants avec mémoire, planifications et identifiants — auto-hébergé',
 }
 
 export const long = {

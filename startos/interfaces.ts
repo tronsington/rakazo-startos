@@ -20,7 +20,9 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const web = sdk.createInterface(effects, {
     name: i18n('Rakazo'),
     id: webInterfaceId,
-    description: i18n('Rakazo web app — chat with and manage your AI teammates'),
+    description: i18n(
+      'Rakazo web app — chat with and manage your AI teammates',
+    ),
     type: 'ui',
     masked: false,
     schemeOverride: null,
