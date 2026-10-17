@@ -22,6 +22,19 @@ const shape = z.looseObject({
   // Comma-separated email allowlist, applied by the API on every start when
   // non-empty (upstream behavior). Empty keeps the stored list.
   signupAllowlist: z.string().catch(''),
+
+  // Bot computers (set via Configure Computers). Upstream reads provider and
+  // credentials from server-side env only (packages/adapters/src/
+  // sandbox-provider-env.ts) — there is no in-app route. 'none' (default)
+  // boots the app without computers.
+  sandboxProvider: z.string().catch('none'),
+  sandboxApiKey: z.string().catch(''),
+  // Optional custom control-plane URL for self-hosted providers (Daytona /
+  // Box / CreateOs). Empty = the provider's hosted default.
+  sandboxApiUrl: z.string().catch(''),
+  // Daytona-only optional tuning knobs; ignore for other providers.
+  daytonaTarget: z.string().catch(''),
+  daytonaSnapshot: z.string().catch(''),
 })
 
 export const storeJson = FileHelper.json(

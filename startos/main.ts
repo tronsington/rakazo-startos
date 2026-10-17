@@ -23,6 +23,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
       chosenOrigin: s.chosenOrigin,
       signupsEnabled: s.signupsEnabled,
       signupAllowlist: s.signupAllowlist,
+      sandboxProvider: s.sandboxProvider,
+      sandboxApiKey: s.sandboxApiKey,
+      sandboxApiUrl: s.sandboxApiUrl,
+      daytonaTarget: s.daytonaTarget,
+      daytonaSnapshot: s.daytonaSnapshot,
     }))
     .const(effects)
 
@@ -40,6 +45,49 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const originHost = origin ? new URL(origin).hostname : ''
 
   const databaseUrl = `postgres://${POSTGRES_USER}:${pgPassword}@127.0.0.1:5432/${POSTGRES_DB}`
+
+  // Bot computers: provider + credentials land as env per upstream's
+  // packages/adapters/src/sandbox-provider-env.ts (env-only — there is no
+  // in-app route). Default 'none'. StartOS packages cannot run the local
+  // Docker supervisor (no host docker.sock), so 'docker' is intentionally
+  // not offered by the action.
+  const sandboxProvider = store?.sandboxProvider ?? 'none'
+  const sandboxApiKey = store?.sandboxApiKey ?? ''
+  const sandboxApiUrl = store?.sandboxApiUrl ?? ''
+  const daytonaTarget = store?.daytonaTarget ?? ''
+  const daytonaSnapshot = store?.daytonaSnapshot ?? ''
+  const sandboxEnv = (() => {
+    if (sandboxProvider === 'e2b' && sandboxApiKey) {
+      return { SANDBOX_PROVIDER: 'e2b', E2B_API_KEY: sandboxApiKey }
+    }
+    if (sandboxProvider === 'daytona' && sandboxApiKey) {
+      return {
+        SANDBOX_PROVIDER: 'daytona',
+        DAYTONA_API_KEY: sandboxApiKey,
+        ...(sandboxApiUrl ? { DAYTONA_API_URL: sandboxApiUrl } : {}),
+        ...(daytonaTarget ? { DAYTONA_TARGET: daytonaTarget } : {}),
+        ...(daytonaSnapshot ? { DAYTONA_SNAPSHOT: daytonaSnapshot } : {}),
+      }
+    }
+    if (sandboxProvider === 'box' && sandboxApiKey) {
+      return {
+        SANDBOX_PROVIDER: 'box',
+        BOX_API_KEY: sandboxApiKey,
+        ...(sandboxApiUrl ? { BOX_API_URL: sandboxApiUrl } : {}),
+      }
+    }
+    if (sandboxProvider === 'createos' && sandboxApiKey) {
+      return {
+        SANDBOX_PROVIDER: 'createos',
+        CREATEOS_SANDBOX_API_KEY: sandboxApiKey,
+        ...(sandboxApiUrl ? { CREATEOS_SANDBOX_BASE_URL: sandboxApiUrl } : {}),
+      }
+    }
+    // 'none' (or a provider whose key was cleared — mirrors upstream's
+    // silent downgrade, but the action hard-requires the key so this only
+    // guards hand-edited state).
+    return { SANDBOX_PROVIDER: 'none' }
+  })()
 
   /**
    * ======================== PostgreSQL sidecar ========================
@@ -176,11 +224,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
             POSTGRES_DB,
             DATABASE_URL: databaseUrl,
             DATA_DIR: '/data',
-            // v1: no bot computers. Upstream's NoneSandboxProvider boots the
-            // product without a computer host (packages/adapters/src/
-            // none-sandbox.ts); remote providers come through the UI/API
-            // keys, not this env.
-            SANDBOX_PROVIDER: 'none',
+            // Bot-computer provider from the Configure Computers action;
+            // upstream's env-only contract (the remote keys have no
+            // in-app route). 'none' boots fine without a computer host.
+            ...sandboxEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',
@@ -225,7 +272,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             AUTH_PASSWORD_ENABLED: 'true',
             DATABASE_URL: databaseUrl,
             DATA_DIR: '/data',
-            SANDBOX_PROVIDER: 'none',
+            ...sandboxEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',

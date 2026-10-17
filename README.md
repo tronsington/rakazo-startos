@@ -27,12 +27,16 @@ make arm        # rakazo_aarch64.s9pk (upstream publishes both)
 
 Upstream's default `SANDBOX_PROVIDER=docker` boots local Chromium "computers"
 through an in-stack supervisor mounting the host Docker socket. StartOS
-service containers cannot get that socket, so v1 ships
+service containers cannot get that socket, so the default ships
 `SANDBOX_PROVIDER=none` — upstream's own `NoneSandboxProvider` keeps the UI,
 chat, memory, credentials and schedules working with no computer host.
-Remote providers (E2B / Daytona / Box) are configured in-app by the user and
-work without the supervisor. Local computers = revisit only if StartOS ever
-exposes a socket capability.
+Remote providers (E2B / Daytona / Box / CreateOs) are set server-side by
+environment variables only (verified in upstream's
+`packages/adapters/src/sandbox-provider-env.ts`), so they are configured
+through the package's **Bot Computers** action, which writes
+`SANDBOX_PROVIDER` + the provider key (and Daytona/Box's optional
+control-plane URL) into the api/worker daemon env. Local computers = revisit
+only if StartOS ever exposes a socket capability.
 
 ## Onboarding flow
 

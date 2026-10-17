@@ -25,10 +25,14 @@ Providers. The package deliberately does not hold your model keys.
 ## Bot computers (current limitation)
 
 Rakazo's headline feature — each bot getting its own browser desktop — needs
-host-level Docker access, which a StartOS package cannot have. This version
-runs with computers disabled; everything else (chat, memory, schedules,
-credential store) works. Remote computer providers (E2B, Daytona, Box) can be
-connected inside the app with your own API key and work fine.
+host-level Docker access, which a StartOS package cannot have. Out of the box
+this version runs with computers disabled; everything else (chat, memory,
+schedules, credential store) works. To enable bot computers, open the
+**Bot Computers** action and connect a remote provider (E2B, Daytona, Box, or
+CreateOs) with your API key — upstream reads these from server-side
+environment only, so the action is where they live. Daytona and Box also
+accept a self-hosted control-plane URL if you run your own on another
+Docker-capable machine.
 
 ## Notes
 
