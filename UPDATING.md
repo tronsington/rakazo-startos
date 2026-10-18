@@ -34,3 +34,8 @@ A bump is:
   use the qemu-free lane documented in AGENTS.md ("Building the aarch64
   lane"). Either way the pack needs a docker-container buildx builder
   (`docker buildx create --driver docker-container --use`).
+  Digest-ref dance order matters on docker 20.10: when an arm pack ends,
+  purge the *arm64* digest-holders of app/postgres/busybox BEFORE
+  re-pulling the amd64 variants (a pull against an arm64-held digest ref
+  errors with "Cannot overwrite digest"), and only then recreate the
+  supervisor. Hit twice on 2026-10-18 (v0.2.0:3 and :4 lanes).
