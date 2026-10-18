@@ -44,6 +44,11 @@ const dict = {
   'Daytona snapshot (optional)': 36,
   'A Daytona snapshot name for the computer image. Leave empty for the provider default.': 37,
   'A provider needs its API key.': 38,
+  // actions/allowPublicEndpoints.ts
+  'Model Providers': 39,
+  'Upstream blocks public model endpoints by default. Toggle only if you use a hosted provider.': 40,
+  'Allow public model endpoints': 41,
+  'Enable only if you add a hosted provider (OpenAI, OpenRouter, …). Everything an agent sends goes to the configured endpoint. Private endpoints on localhost or your LAN always work with this off.': 42,
   // init/seedFiles.ts
   'Choose the address Rakazo serves its web app on': 25,
 } as const

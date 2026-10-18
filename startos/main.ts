@@ -28,6 +28,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
       sandboxApiUrl: s.sandboxApiUrl,
       daytonaTarget: s.daytonaTarget,
       daytonaSnapshot: s.daytonaSnapshot,
+      allowPublicModelEndpoints: s.allowPublicModelEndpoints,
     }))
     .const(effects)
 
@@ -88,6 +89,16 @@ export const main = sdk.setupMain(async ({ effects }) => {
     // guards hand-edited state).
     return { SANDBOX_PROVIDER: 'none' }
   })()
+
+  // Model Providers action: upstream gates public (non-RFC1918/loopback)
+  // OpenAI-compatible endpoints behind this env flag; private endpoints are
+  // never gated. Plumb to api (model management) AND worker (agent
+  // execution) — the check lives in shared adapter code upstream, so both
+  // processes get the same answer.
+  const allowPublicModelEndpoints = store?.allowPublicModelEndpoints ?? false
+  const publicEndpointsEnv = allowPublicModelEndpoints
+    ? { RAKAZO_OPENAI_COMPAT_ALLOW_PUBLIC: '1' }
+    : {}
 
   /**
    * ======================== PostgreSQL sidecar ========================
@@ -228,6 +239,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             // upstream's env-only contract (the remote keys have no
             // in-app route). 'none' boots fine without a computer host.
             ...sandboxEnv,
+            ...publicEndpointsEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',
@@ -273,6 +285,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             DATABASE_URL: databaseUrl,
             DATA_DIR: '/data',
             ...sandboxEnv,
+            ...publicEndpointsEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',

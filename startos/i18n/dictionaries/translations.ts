@@ -41,6 +41,10 @@ export default {
     36: 'Snapshot de Daytona (opcional)',
     37: 'Un nombre de snapshot de Daytona para la imagen del computador. Deja vacío para el valor por defecto del proveedor.',
     38: 'Un proveedor necesita su clave de API.',
+    39: 'Proveedores de modelos',
+    40: 'Upstream bloquea los endpoints de modelos públicos por defecto. Actívalo solo si usas un proveedor alojado.',
+    41: 'Permitir endpoints de modelos públicos',
+    42: 'Actívalo solo si añades un proveedor alojado (OpenAI, OpenRouter, …). Todo lo que un agente envía llega al endpoint configurado. Los endpoints privados en localhost o en tu LAN siempre funcionan con esto desactivado.',
   },
   de_DE: {
     0: 'Rakazo wird gestartet',
@@ -82,6 +86,10 @@ export default {
     36: 'Daytona-Snapshot (optional)',
     37: 'Ein Daytona-Snapshot-Name für das Computer-Image. Leer lassen für den Provider-Standard.',
     38: 'Ein Provider braucht seinen API-Schlüssel.',
+    39: 'Modell-Anbieter',
+    40: 'Upstream blockiert öffentliche Modell-Endpunkte standardmäßig. Nur aktivieren, wenn du einen gehosteten Anbieter nutzt.',
+    41: 'Öffentliche Modell-Endpunkte erlauben',
+    42: 'Nur aktivieren, wenn du einen gehosteten Anbieter hinzufügst (OpenAI, OpenRouter, …). Alles, was ein Agent sendet, geht an den konfigurierten Endpunkt. Private Endpunkte auf localhost oder im LAN funktionieren immer ohne diesen Schalter.',
   },
   pl_PL: {
     0: 'Uruchamianie Rakazo',
@@ -123,6 +131,10 @@ export default {
     36: 'Snapshot Daytony (opcjonalny)',
     37: 'Nazwa snapshota Daytony dla obrazu komputera. Pozostaw puste dla wartości domyślnej dostawcy.',
     38: 'Dostawca potrzebuje swojego klucza API.',
+    39: 'Dostawcy modeli',
+    40: 'Upstream domyślnie blokuje publiczne punkty końcowe modeli. Włącz tylko, jeśli korzystasz z dostawcy hostowanego.',
+    41: 'Zezwalaj na publiczne punkty końcowe modeli',
+    42: 'Włącz tylko, jeśli dodajesz dostawcę hostowanego (OpenAI, OpenRouter, …). Wszystko, co wysyła agent, trafia do skonfigurowanego punktu końcowego. Prywatne punkty końcowe na localhost lub w Twojej sieci LAN zawsze działają przy wyłączonej opcji.',
   },
   fr_FR: {
     0: 'Démarrage de Rakazo',
@@ -164,5 +176,9 @@ export default {
     36: 'Snapshot Daytona (facultatif)',
     37: 'Un nom de snapshot Daytona pour l’image de l’ordinateur. Laissez vide pour le défaut du fournisseur.',
     38: 'Un fournisseur a besoin de sa clé API.',
+    39: 'Fournisseurs de modèles',
+    40: 'Upstream bloque les points de terminaison de modèles publics par défaut. N’activez que si vous utilisez un fournisseur hébergé.',
+    41: 'Autoriser les points de terminaison de modèles publics',
+    42: 'N’activez que si vous ajoutez un fournisseur hébergé (OpenAI, OpenRouter, …). Tout ce qu’un agent envoie va au point de terminaison configuré. Les points de terminaison privés sur localhost ou votre LAN fonctionnent toujours sans cette option.',
   },
 } satisfies Record<string, LangDict>

@@ -35,6 +35,12 @@ const shape = z.looseObject({
   // Daytona-only optional tuning knobs; ignore for other providers.
   daytonaTarget: z.string().catch(''),
   daytonaSnapshot: z.string().catch(''),
+
+  // Upstream's model-endpoint gate (set via the Model Providers action).
+  // RAKAZO_OPENAI_COMPAT_ALLOW_PUBLIC=1 lets the user add endpoints that
+  // resolve to public IPs; localhost and RFC1918 endpoints are never gated.
+  // Default false keeps upstream's data-leak protection.
+  allowPublicModelEndpoints: z.boolean().catch(false),
 })
 
 export const storeJson = FileHelper.json(
