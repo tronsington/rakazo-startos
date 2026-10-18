@@ -72,7 +72,7 @@ export const configureComputers = sdk.Action.withInput(
   async () => ({
     name: i18n('Bot Computers'),
     description: i18n(
-      'Choose where bot computers run. StartOS packages cannot run the local Docker supervisor (no host Docker socket), so pick a remote provider — or leave at None to run without computers.',
+      'Choose where bot computers run. Bots cannot reply until one is set — every conversation provisions a computer first. StartOS packages cannot run the local Docker supervisor (no host Docker socket), so pick a remote provider.',
     ),
     warning: null,
     allowedStatuses: 'any',

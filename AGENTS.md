@@ -8,6 +8,14 @@ the SDK recipe index** — same discipline as the sibling packages.
 
 ## Design decisions not to re-litigate
 
+- **SANDBOX_PROVIDER=none means bots CANNOT converse** (verified live by
+  Dylan 2026-10-18, source @f10b4ffd): createBot always attaches a computer
+  (team-scope by default) and every run provisions it first; the none
+  provider fails every provision. "none" boots the UI, models and
+  credentials only. Bots created under none self-heal when a provider is
+  later set — the computer row's kind/providerRef are rewritten at the first
+  successful provision. Docs and the Bot Computers action say this.
+
 - **SANDBOX_PROVIDER=none in v1.** Bot computers need the host docker.sock
   (upstream's supervisor model); StartOS containers can't get one. Upstream's
   `packages/adapters/src/none-sandbox.ts` boots fine without computers.
@@ -34,6 +42,8 @@ the SDK recipe index** — same discipline as the sibling packages.
 
 ## Known-untested on purpose (verify on first real install)
 
-- api/worker behavior under provider=none end-to-end beyond the source read.
+- ~~api/worker behavior under provider=none end-to-end~~ RESOLVED
+  2026-10-18 (live log + source read): runs fail at setup with "Computers
+  unavailable"; bots need a provider. See the top design-decisions bullet.
 - Vite preview `--host 0.0.0.0` neighborly to the StartOS interface binding.
 - Whether anything calls the absent sandbox-supervisor URL at runtime anyway.

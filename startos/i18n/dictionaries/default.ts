@@ -32,7 +32,7 @@ const dict = {
   'Only these addresses may register while set. Empty keeps the list already stored. Requires registrations to stay enabled to matter.': 24,
   // actions/configureComputers.ts
   'Bot Computers': 26,
-  'Choose where bot computers run. StartOS packages cannot run the local Docker supervisor (no host Docker socket), so pick a remote provider — or leave at None to run without computers.': 27,
+  'Choose where bot computers run. Bots cannot reply until one is set — every conversation provisions a computer first. StartOS packages cannot run the local Docker supervisor (no host Docker socket), so pick a remote provider.': 27,
   Provider: 28,
   'None runs Rakazo without bot computers. Createos/Box/Daytona accept a self-hosted control-plane URL; E2B is hosted only.': 29,
   'API Key': 30,

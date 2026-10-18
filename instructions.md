@@ -22,17 +22,21 @@ Model provider keys (OpenRouter, Anthropic, OpenAI-compatible endpoints, …)
 are entered **inside the Rakazo app**, per user or per bot — Bot settings →
 Providers. The package deliberately does not hold your model keys.
 
-## Bot computers (current limitation)
+## Bot computers (required before bots can answer)
 
-Rakazo's headline feature — each bot getting its own browser desktop — needs
-host-level Docker access, which a StartOS package cannot have. Out of the box
-this version runs with computers disabled; everything else (chat, memory,
-schedules, credential store) works. To enable bot computers, open the
-**Bot Computers** action and connect a remote provider (E2B, Daytona, Box, or
-CreateOs) with your API key — upstream reads these from server-side
-environment only, so the action is where they live. Daytona and Box also
-accept a self-hosted control-plane URL if you run your own on another
-Docker-capable machine.
+Rakazo's headline feature — each bot living on its own browser desktop — needs
+host-level Docker access, which a StartOS package cannot have. **A bot cannot
+answer a single message until you connect a computer provider**: every
+conversation provisions its computer first. Out of the box the service runs
+with no provider, so the account, models and credentials all configure fine,
+but bots dead-end.
+
+Open the **Bot Computers** action and connect a provider: E2B (hosted,
+easiest), or a self-hosted Daytona, Box, or CreateOs control plane on another
+Docker-capable machine (those accept your own URL). Upstream reads these from
+server-side environment only, so the action is where they live. Bots created
+before a provider was set recover on their own at their next message — no
+reinstall needed.
 
 ## Notes
 
