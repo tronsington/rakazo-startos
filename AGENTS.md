@@ -8,6 +8,15 @@ the SDK recipe index** — same discipline as the sibling packages.
 
 ## Design decisions not to re-litigate
 
+- **Bridge enrollment line: never combine OpenSSH `restrict` with
+  `permitopen`.** `restrict` implies no-port-forwarding and is NOT overridden
+  by an explicit permitopen on the same line: auth succeeds, `-O forward`
+  registers, then every channel open is refused — the client sees
+  connect-then-ECONNRESET and the web service logs screen.proxy upstream_error
+  502s. Use explicit no-* options + permitopen. Reproduced live against
+  OpenSSH 9.2p1 and fixed on the deployed sandbox 2026-10-18 (v0.2.0-4
+  incident); bridgeSetup.ts carries the byte-exact good line.
+
 - **Screen bridge (v0.2.0:3) — the shared-netns fact is load-bearing.** All
   daemons in this package share ONE network namespace (proven in prod by the
   web→api `127.0.0.1:3100` proxy). That is why the bridge sidecar works with

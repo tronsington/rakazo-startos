@@ -7,8 +7,12 @@ import { sdk } from '../sdk'
 // bridge is what makes the desktop view (and click/type control) work from
 // here — without it bots run but their screens stay unreachable.
 
+// OpenSSH's `restrict` implies no-port-forwarding and is NOT re-opened by an
+// explicit permitopen on the same line (channels refuse: client sees a
+// connect-then-reset). Spell the restrictions out instead. Verified live
+// against OpenSSH 9.2p1 on 2026-10-18 (rakazo v0.2.0-4 incident).
 const LOCKDOWN_PREFIX =
-  'restrict,no-pty,no-agent-forwarding,no-X11-forwarding,permitopen="127.0.0.1:*"'
+  'no-pty,no-agent-forwarding,no-X11-forwarding,no-user-rc,permitopen="127.0.0.1:*"'
 
 export const bridgeSetup = sdk.Action.withoutInput(
   'bridge-setup',
