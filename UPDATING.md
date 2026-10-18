@@ -29,6 +29,8 @@ A bump is:
 - **assets/shims/strip-foreign-dispatcher.cjs**: drop when the upstream
   openai/undici pairing bug is fixed (see AGENTS.md), then remove the
   `dispatcherShimEnv` spread and `shimsMount` from main.ts.
-- **aarch64 builds**: the bridge image compiles from source on the arm lane —
-  the build host needs qemu binfmt (`docker run --rm --privileged
-  tonistiigi/binfmt --install arm64`, once per boot, needs docker privilege).
+- **aarch64 builds**: the bridge image compiles from source on the arm lane.
+  On a bare metal/VM builder with binfmt it just builds; on the LXC sandbox
+  use the qemu-free lane documented in AGENTS.md ("Building the aarch64
+  lane"). Either way the pack needs a docker-container buildx builder
+  (`docker buildx create --driver docker-container --use`).

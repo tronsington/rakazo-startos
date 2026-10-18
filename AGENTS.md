@@ -34,10 +34,21 @@ the SDK recipe index** — same discipline as the sibling packages.
 - **Bridge known limitation:** a refused `ssh -O cancel` forfeits that local
   port until the ssh mux bounces (mux bounce = full rebuild, next scan
   retries refused forwards). Accepted for v1.
-- **Building needs qemu binfmt on the aarch64 lane** (bridge image RUN steps
-  execute foreign binaries). Register once per boot on the build host:
-  `docker run --rm --privileged tonistiigi/binfmt --install arm64`. That's a
-  host-kernel change — disclose it to the box owner when you use it.
+- **Building the aarch64 lane on the sandbox**: binfmt is IMPOSSIBLE there
+  (LXC — the host kernel owns binfmt_misc; tonistiigi/binfmt fails with
+  EACCES even privileged). The qemu-free path used for v0.2.0-3 lives in
+  ~/builds/build-bridge-rootfs-arm64.sh on the sandbox: export the arm64
+  alpine rootfs (pull by TAG — docker 20.10 digest refs deadlock on
+  arch-flips; stop/rmi amd64 digest holders incl. the running supervisor's
+  image, then restore it after), apk cross-install from an x86 alpine
+  container (seed /arm/etc/apk/keys, --no-scripts), CA bundle copied from the
+  native x86 bridge image, sha-pinned cloudflared, ELF-aarch64 verified, then
+  swap Dockerfile to a RUN-free `FROM scratch / ADD rootfs` variant for
+  `make arm` (arm s9pk manifest shows gitHash "-modified" — accepted,
+  disclosed; x86_64 packs clean from the committed Dockerfile). Pack also
+  needs a docker-container buildx builder (`docker buildx create
+  --driver docker-container --name s9pk --use --bootstrap`) — the default
+  docker driver cannot export local builds.
 - **SANDBOX_PROVIDER=none means bots CANNOT converse** (verified live by
   Dylan 2026-10-18, source @f10b4ffd): createBot always attaches a computer
   (team-scope by default) and every run provisions it first; the none
