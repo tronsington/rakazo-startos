@@ -19,7 +19,11 @@ the SDK recipe index** — same discipline as the sibling packages.
 - **SANDBOX_PROVIDER=none in v1.** Bot computers need the host docker.sock
   (upstream's supervisor model); StartOS containers can't get one. Upstream's
   `packages/adapters/src/none-sandbox.ts` boots fine without computers.
-  Remote providers (e2b/daytona/box) stay in-app, per user.
+  **v0.2.0:2 adds the third path**: the Configure Computers action accepts
+  provider=docker pointed at a REMOTE supervisor (SANDBOX_SUPERVISOR_URL +
+  TOKEN) — the supervisor runs from upstream's app image on any Docker host
+  the box can reach; it spawns rakazo's own computer image there. Hosted/self-
+  served remote providers (e2b/daytona/box/createos) are in the same action.
 - **Neither browserless nor webtop substitutes for bot computers.** Upstream's
   own computer image already IS a desktop-in-container (Xvfb+fluxbox+noVNC+
   Chromium, infra/sandboxes/computer/Dockerfile) driven via rakazo's supervisor

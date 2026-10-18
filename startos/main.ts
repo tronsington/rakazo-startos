@@ -26,6 +26,8 @@ export const main = sdk.setupMain(async ({ effects }) => {
       sandboxProvider: s.sandboxProvider,
       sandboxApiKey: s.sandboxApiKey,
       sandboxApiUrl: s.sandboxApiUrl,
+      sandboxSupervisorUrl: s.sandboxSupervisorUrl,
+      sandboxSupervisorToken: s.sandboxSupervisorToken,
       daytonaTarget: s.daytonaTarget,
       daytonaSnapshot: s.daytonaSnapshot,
       allowPublicModelEndpoints: s.allowPublicModelEndpoints,
@@ -55,9 +57,22 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const sandboxProvider = store?.sandboxProvider ?? 'none'
   const sandboxApiKey = store?.sandboxApiKey ?? ''
   const sandboxApiUrl = store?.sandboxApiUrl ?? ''
+  const sandboxSupervisorUrl = store?.sandboxSupervisorUrl ?? ''
+  const sandboxSupervisorToken = store?.sandboxSupervisorToken ?? ''
   const daytonaTarget = store?.daytonaTarget ?? ''
   const daytonaSnapshot = store?.daytonaSnapshot ?? ''
   const sandboxEnv = (() => {
+    if (
+      sandboxProvider === 'docker' &&
+      sandboxSupervisorUrl &&
+      sandboxSupervisorToken
+    ) {
+      return {
+        SANDBOX_PROVIDER: 'docker',
+        SANDBOX_SUPERVISOR_URL: sandboxSupervisorUrl,
+        SANDBOX_SUPERVISOR_TOKEN: sandboxSupervisorToken,
+      }
+    }
     if (sandboxProvider === 'e2b' && sandboxApiKey) {
       return { SANDBOX_PROVIDER: 'e2b', E2B_API_KEY: sandboxApiKey }
     }

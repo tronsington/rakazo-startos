@@ -32,6 +32,10 @@ const shape = z.looseObject({
   // Optional custom control-plane URL for self-hosted providers (Daytona /
   // Box / CreateOs). Empty = the provider's hosted default.
   sandboxApiUrl: z.string().catch(''),
+  // Docker-remote mode: the sandbox supervisor running on a separate Docker
+  // host. URL + shared bearer token (upstream's SANDBOX_SUPERVISOR_*).
+  sandboxSupervisorUrl: z.string().catch(''),
+  sandboxSupervisorToken: z.string().catch(''),
   // Daytona-only optional tuning knobs; ignore for other providers.
   daytonaTarget: z.string().catch(''),
   daytonaSnapshot: z.string().catch(''),

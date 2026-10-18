@@ -14,16 +14,37 @@ const inputSpec = InputSpec.of({
   provider: Value.select({
     name: i18n('Provider'),
     description: i18n(
-      'None runs Rakazo without bot computers. Createos/Box/Daytona accept a self-hosted control-plane URL; E2B is hosted only.',
+      'None runs Rakazo without bot computers. Docker expects your own supervisor on a separate Docker host; Createos/Box/Daytona accept a self-hosted control-plane URL; E2B is hosted only.',
     ),
     default: 'none',
     values: {
       none: 'None (no bot computers)',
+      docker: 'Docker — remote host (via sandbox supervisor)',
       e2b: 'E2B (hosted)',
       daytona: 'Daytona (hosted or self-hosted)',
       box: 'Box (hosted or self-hosted)',
       createos: 'CreateOs (hosted or self-hosted)',
     },
+  }),
+  supervisorUrl: Value.text({
+    name: i18n('Supervisor URL (Docker-remote only)'),
+    description: i18n(
+      'The sandbox supervisor running on your remote Docker host, e.g. http://192.168.x.x:7091. Access to it is equivalent to control of that Docker host — keep it on your LAN.',
+    ),
+    required: false,
+    default: null,
+    masked: false,
+    placeholder: 'http://192.168.50.2:7091',
+  }),
+  supervisorToken: Value.text({
+    name: i18n('Supervisor token (Docker-remote only)'),
+    description: i18n(
+      'The shared bearer token the supervisor on your remote host was started with (32+ characters). Re-enter only when rotating it.',
+    ),
+    required: false,
+    default: null,
+    masked: true,
+    placeholder: null,
   }),
   apiKey: Value.text({
     name: i18n('API Key'),
@@ -85,11 +106,14 @@ export const configureComputers = sdk.Action.withInput(
     return {
       provider: (current?.sandboxProvider ?? 'none') as
         | 'none'
+        | 'docker'
         | 'e2b'
         | 'daytona'
         | 'box'
         | 'createos',
       apiKey: '',
+      supervisorUrl: current?.sandboxSupervisorUrl ?? '',
+      supervisorToken: '',
       apiUrl: current?.sandboxApiUrl ?? '',
       daytonaTarget: current?.daytonaTarget ?? '',
       daytonaSnapshot: current?.daytonaSnapshot ?? '',
@@ -101,6 +125,34 @@ export const configureComputers = sdk.Action.withInput(
         sandboxProvider: 'none',
         sandboxApiKey: '',
         sandboxApiUrl: '',
+        sandboxSupervisorUrl: '',
+        sandboxSupervisorToken: '',
+        daytonaTarget: '',
+        daytonaSnapshot: '',
+      })
+      return
+    }
+    if (input.provider === 'docker') {
+      // Remote-supervisor mode: URL + token, no provider API key. Upstream
+      // silently downgrades to 'none' without the token, so require it.
+      if (!input.supervisorUrl) {
+        throw new Error(i18n('Docker-remote needs the supervisor URL.'))
+      }
+      const keepSecret = !input.supervisorToken
+      const current = keepSecret
+        ? await storeJson.read((s) => s.sandboxSupervisorToken).once()
+        : null
+      if (keepSecret && !current) {
+        throw new Error(i18n('Docker-remote needs the supervisor token.'))
+      }
+      await storeJson.merge(effects, {
+        sandboxProvider: 'docker',
+        sandboxApiKey: '',
+        sandboxApiUrl: '',
+        sandboxSupervisorUrl: (input.supervisorUrl || '').replace(/\/+$/, ''),
+        ...(keepSecret
+          ? {}
+          : { sandboxSupervisorToken: input.supervisorToken ?? '' }),
         daytonaTarget: '',
         daytonaSnapshot: '',
       })
@@ -121,6 +173,8 @@ export const configureComputers = sdk.Action.withInput(
       sandboxProvider: input.provider,
       ...(keepSecret ? {} : { sandboxApiKey: input.apiKey ?? '' }),
       sandboxApiUrl: input.apiUrl || '',
+      sandboxSupervisorUrl: '',
+      sandboxSupervisorToken: '',
       daytonaTarget: input.daytonaTarget || '',
       daytonaSnapshot: input.daytonaSnapshot || '',
     })

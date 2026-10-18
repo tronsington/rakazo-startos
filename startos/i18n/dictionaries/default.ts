@@ -34,7 +34,7 @@ const dict = {
   'Bot Computers': 26,
   'Choose where bot computers run. Bots cannot reply until one is set — every conversation provisions a computer first. StartOS packages cannot run the local Docker supervisor (no host Docker socket), so pick a remote provider.': 27,
   Provider: 28,
-  'None runs Rakazo without bot computers. Createos/Box/Daytona accept a self-hosted control-plane URL; E2B is hosted only.': 29,
+  'None runs Rakazo without bot computers. Docker expects your own supervisor on a separate Docker host; Createos/Box/Daytona accept a self-hosted control-plane URL; E2B is hosted only.': 29,
   'API Key': 30,
   'Your provider API key. Required when switching away from None; re-enter only when rotating it.': 31,
   'Control-plane URL (optional)': 32,
@@ -49,6 +49,12 @@ const dict = {
   'Upstream blocks public model endpoints by default. Toggle only if you use a hosted provider.': 40,
   'Allow public model endpoints': 41,
   'Enable only if you add a hosted provider (OpenAI, OpenRouter, …). Everything an agent sends goes to the configured endpoint. Private endpoints on localhost or your LAN always work with this off.': 42,
+  'Supervisor URL (Docker-remote only)': 43,
+  'The sandbox supervisor running on your remote Docker host, e.g. http://192.168.x.x:7091. Access to it is equivalent to control of that Docker host — keep it on your LAN.': 44,
+  'Supervisor token (Docker-remote only)': 45,
+  'The shared bearer token the supervisor on your remote host was started with (32+ characters). Re-enter only when rotating it.': 46,
+  'Docker-remote needs the supervisor URL.': 47,
+  'Docker-remote needs the supervisor token.': 48,
   // init/seedFiles.ts
   'Choose the address Rakazo serves its web app on': 25,
 } as const

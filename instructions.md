@@ -31,12 +31,18 @@ conversation provisions its computer first. Out of the box the service runs
 with no provider, so the account, models and credentials all configure fine,
 but bots dead-end.
 
-Open the **Bot Computers** action and connect a provider: E2B (hosted,
-easiest), or a self-hosted Daytona, Box, or CreateOs control plane on another
-Docker-capable machine (those accept your own URL). Upstream reads these from
-server-side environment only, so the action is where they live. Bots created
-before a provider was set recover on their own at their next message — no
-reinstall needed.
+Open the **Bot Computers** action and connect a provider. Options:
+
+- **Docker — remote host**: run upstream's sandbox supervisor on another
+  Docker-capable machine of yours, then point the action at it (URL + shared
+  token). This keeps bot computers on your own hardware.
+- **E2B** (hosted, easiest): just its API key.
+- **Daytona / Box / CreateOs**: hosted, or a self-hosted control plane on
+  another Docker-capable machine (those accept your own URL).
+
+Upstream reads these from server-side environment only, so the action is where
+they live. Bots created before a provider was set recover on their own at
+their next message — no reinstall needed.
 
 ## Notes
 
