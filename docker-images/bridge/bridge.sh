@@ -32,6 +32,9 @@ CF_LOCAL_PORT=6222
 CTL="${SSH_CTL:-/tmp/bridge.ctl}"
 STATE="/tmp/bridge.state"
 CF_LOG="/tmp/cloudflared.log"
+# Initialized here (set -u): proxy_alive runs before the first spawn, and the
+# restart check in ensure_proxy reads it on every round.
+CF_PID=""
 
 # Keypair comes before the mode check so the Screen Bridge Setup action can
 # always print a pubkey. Generated once, persisted on the bridge volume,
@@ -66,7 +69,7 @@ fi
 
 SSH_ARGS="-i $SSH_KEY $PORTOPT -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -o BatchMode=yes -o ConnectTimeout=10"
 
-proxy_alive() { [ -n "$CF_PID" ] && kill -0 "$CF_PID" 2>/dev/null; }
+proxy_alive() { [ -n "${CF_PID:-}" ] && kill -0 "$CF_PID" 2>/dev/null; }
 
 ensure_proxy() {
   [ "$MODE" = cf ] || return 0
