@@ -40,6 +40,17 @@ const shape = z.looseObject({
   daytonaTarget: z.string().catch(''),
   daytonaSnapshot: z.string().catch(''),
 
+  // Screen bridge (set via Configure Computers). With Docker-remote, the
+  // supervisor publishes bot desktops on the sandbox's loopback; the bridge
+  // sidecar republishes them inside this package over ssh. Cloudflare mode
+  // (hostname + service token pair) for hosts only reachable via a tunnel;
+  // direct host for LAN/VPN. Secrets keep-on-empty in the action.
+  bridgeSshUser: z.string().catch(''),
+  bridgeSshHost: z.string().catch(''),
+  bridgeCfHostname: z.string().catch(''),
+  bridgeCfTokenId: z.string().catch(''),
+  bridgeCfTokenSecret: z.string().catch(''),
+
   // Upstream's model-endpoint gate (set via the Model Providers action).
   // RAKAZO_OPENAI_COMPAT_ALLOW_PUBLIC=1 lets the user add endpoints that
   // resolve to public IPs; localhost and RFC1918 endpoints are never gated.

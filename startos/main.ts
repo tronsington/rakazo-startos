@@ -31,6 +31,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
       daytonaTarget: s.daytonaTarget,
       daytonaSnapshot: s.daytonaSnapshot,
       allowPublicModelEndpoints: s.allowPublicModelEndpoints,
+      bridgeSshUser: s.bridgeSshUser,
+      bridgeSshHost: s.bridgeSshHost,
+      bridgeCfHostname: s.bridgeCfHostname,
+      bridgeCfTokenId: s.bridgeCfTokenId,
+      bridgeCfTokenSecret: s.bridgeCfTokenSecret,
     }))
     .const(effects)
 
@@ -115,6 +120,28 @@ export const main = sdk.setupMain(async ({ effects }) => {
     ? { RAKAZO_OPENAI_COMPAT_ALLOW_PUBLIC: '1' }
     : {}
 
+  // Screen-bridge sidecar env (Docker-remote desktop view/control). Empty
+  // strings = bridge daemon idles. The Cloudflare trio selects tunnel mode;
+  // otherwise a directly reachable host. See docker-images/bridge/bridge.sh.
+  const bridgeEnv = {
+    SSH_USER: store?.bridgeSshUser ?? '',
+    SSH_HOST: store?.bridgeSshHost ?? '',
+    CF_SSH_HOSTNAME: store?.bridgeCfHostname ?? '',
+    CF_SERVICE_TOKEN_ID: store?.bridgeCfTokenId ?? '',
+    CF_SERVICE_TOKEN_SECRET: store?.bridgeCfTokenSecret ?? '',
+  }
+
+  // Shim mount shared by api + worker: the packaged
+  // strip-foreign-dispatcher.cjs preload. Without it, openai-compatible
+  // model endpoints crash on an undici dispatcher type mismatch (upstream
+  // bug at the pinned commit); the shim deletes init.dispatcher before Node
+  // fetch. Tradeoff: that lane loses upstream's SSRF DNS-pinning while the
+  // shim is present — flagged in the release notes.
+  const shimsMount = { subpath: 'shims', mountpoint: '/opt/rakazo-shims' }
+  const dispatcherShimEnv = {
+    NODE_OPTIONS: `--require ${shimsMount.mountpoint}/strip-foreign-dispatcher.cjs`,
+  }
+
   /**
    * ======================== PostgreSQL sidecar ========================
    * Dedicated to this package; loopback only. pg 16 digest-pinned in the
@@ -140,23 +167,27 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const apiSub = sdk.SubContainer.of(
     effects,
     { imageId: 'rakazo' },
-    sdk.Mounts.of().mountVolume({
-      volumeId: 'data',
-      subpath: null,
-      mountpoint: '/data',
-      readonly: false,
-    }),
+    sdk.Mounts.of()
+      .mountVolume({
+        volumeId: 'data',
+        subpath: null,
+        mountpoint: '/data',
+        readonly: false,
+      })
+      .mountAssets(shimsMount),
     'rakazo-api',
   )
   const workerSub = sdk.SubContainer.of(
     effects,
     { imageId: 'rakazo' },
-    sdk.Mounts.of().mountVolume({
-      volumeId: 'data',
-      subpath: null,
-      mountpoint: '/data',
-      readonly: false,
-    }),
+    sdk.Mounts.of()
+      .mountVolume({
+        volumeId: 'data',
+        subpath: null,
+        mountpoint: '/data',
+        readonly: false,
+      })
+      .mountAssets(shimsMount),
     'rakazo-worker',
   )
   const webSub = sdk.SubContainer.of(
@@ -180,6 +211,37 @@ export const main = sdk.setupMain(async ({ effects }) => {
     'chown-data',
   )
 
+  /**
+   * ======================== Screen bridge sidecar ========================
+   * Local package image (docker-images/bridge). Republishes the sandbox's
+   * loopback-only desktop/control ports inside this package's shared network
+   * namespace via ssh forwards, so the web service's sealed 127.0.0.1 screen
+   * URLs resolve unchanged (no app-side rewrite). Owns its volume alone:
+   * the ssh keypair persists there and no other service can read it.
+   */
+  const bridgeSub = sdk.SubContainer.of(
+    effects,
+    { imageId: 'bridge' },
+    sdk.Mounts.of().mountVolume({
+      volumeId: 'bridge',
+      subpath: null,
+      mountpoint: '/bridge',
+      readonly: false,
+    }),
+    'rakazo-bridge',
+  )
+  const chownBridgeSub = sdk.SubContainer.of(
+    effects,
+    { imageId: 'busybox' },
+    sdk.Mounts.of().mountVolume({
+      volumeId: 'bridge',
+      subpath: null,
+      mountpoint: '/bridge',
+      readonly: false,
+    }),
+    'chown-bridge',
+  )
+
   return (
     sdk.Daemons.of(effects)
       // Upstream pattern: StartOS volume storage shadows baked-in ownership,
@@ -189,6 +251,16 @@ export const main = sdk.setupMain(async ({ effects }) => {
         subcontainer: chownDataSub,
         exec: {
           command: ['chown', '-R', '1000:1000', '/data'],
+          user: 'root',
+        },
+        requires: [],
+      })
+      // Bridge volume must be writable by the image's bridge user (uid 1001)
+      // — ssh-keygen persists the keypair there. Same shape as chown-data.
+      .addOneshot('chown-bridge', {
+        subcontainer: chownBridgeSub,
+        exec: {
+          command: ['chown', '-R', '1001:1001', '/bridge'],
           user: 'root',
         },
         requires: [],
@@ -255,6 +327,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             // in-app route). 'none' boots fine without a computer host.
             ...sandboxEnv,
             ...publicEndpointsEnv,
+            ...dispatcherShimEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',
@@ -301,6 +374,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             DATA_DIR: '/data',
             ...sandboxEnv,
             ...publicEndpointsEnv,
+            ...dispatcherShimEnv,
             CLOUD_AGENT_PROVIDER: 'none',
             WAKEUP_DRIVER: 'graphile',
             AGENT_RUNTIME: 'pi',
@@ -353,6 +427,36 @@ export const main = sdk.setupMain(async ({ effects }) => {
           gracePeriod: 30_000,
         },
         requires: ['api'],
+      })
+      // No published interface, no peer services: the forwards it opens are
+      // dialed over this package's shared loopback by the web service alone.
+      .addDaemon('bridge', {
+        subcontainer: bridgeSub,
+        exec: {
+          command: sdk.useEntrypoint([]),
+          env: bridgeEnv,
+        },
+        ready: {
+          display: null, // internal sidecar
+          fn: async () => {
+            // Active mode runs bridge.sh; the no-connection-configured idle
+            // state is a bare sleep, which is "working as designed", not a
+            // failure.
+            const result = await bridgeSub.exec([
+              'sh',
+              '-c',
+              'pgrep -f bridge.sh >/dev/null 2>&1 || pgrep sleep >/dev/null 2>&1',
+            ])
+            return result.exitCode === 0
+              ? { result: 'success', message: i18n('Screen bridge is running') }
+              : {
+                  result: 'starting',
+                  message: i18n('Screen bridge is not running'),
+                }
+          },
+          gracePeriod: 15_000,
+        },
+        requires: ['chown-bridge'],
       })
   )
 })

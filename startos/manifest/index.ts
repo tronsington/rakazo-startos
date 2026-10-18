@@ -13,7 +13,11 @@ export const manifest = setupManifest({
   // pgdata = Postgres cluster; data = app uploads/workspace (upstream
   // appdata); main = this package's own store.json (secrets). Do not
   // co-locate: backups.ts dumps pgdata logically via withPgDump.
-  volumes: ['pgdata', 'data', 'main'],
+  // pgdata = Postgres cluster; data = app uploads/workspace (upstream
+  // appdata); main = this package's own store.json (secrets); bridge = the
+  // screen bridge's ssh keypair (owned by its sidecar alone). Do not
+  // co-locate: backups.ts dumps pgdata logically via withPgDump.
+  volumes: ['pgdata', 'data', 'main', 'bridge'],
   images: {
     // ghcr.io/elie222/rakazo/app v0.2.0 (commit f10b4ffd), pinned by digest.
     // Upstream publishes no semver image tags yet — per-commit sha-* tags only;
@@ -38,6 +42,18 @@ export const manifest = setupManifest({
       source: {
         dockerTag:
           'busybox:1@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e',
+      },
+      arch: ['x86_64', 'aarch64'],
+    },
+    // Screen/control bridge sidecar — our own image (no upstream equivalent).
+    // Built from this repo at pack time, both arches; alpine base is
+    // digest-pinned inside the Dockerfile, cloudflared by version+sha256.
+    bridge: {
+      source: {
+        dockerBuild: {
+          dockerfile: 'docker-images/bridge/Dockerfile',
+          workdir: 'docker-images/bridge',
+        },
       },
       arch: ['x86_64', 'aarch64'],
     },

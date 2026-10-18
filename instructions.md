@@ -44,6 +44,36 @@ Upstream reads these from server-side environment only, so the action is where
 they live. Bots created before a provider was set recover on their own at
 their next message — no reinstall needed.
 
+## Desktop view & control (Docker-remote only)
+
+With Docker-remote computers, the sandbox publishes each bot's desktop on its
+own loopback, which this box cannot reach. The package's **screen bridge** (a
+small sidecar, always installed) republishes those desktops inside this
+service over ssh — that's what makes the in-app desktop view and click/type
+control work. One-time setup on your computer host:
+
+1. Run the **Screen Bridge Setup** action and append the printed
+   `authorized_keys` line to your computer host's ssh user (one line, no
+   wrapping).
+2. Give that user Docker access: `sudo usermod -aG docker <user>`, then log in
+   again.
+3. In the supervisor's compose file, set `network_mode: host` on the
+   supervisor service and recreate it — its health checks and control channel
+   then reach the desktops it starts.
+4. If the host is only reachable through Cloudflare, add a dedicated ssh route
+   to the tunnel's ingress:
+   ```yaml
+   - hostname: rakazo-ssh.<your-domain>
+     service: ssh://localhost:22
+   ```
+   plus an Access service token allowed on that hostname.
+
+Then open **Bot Computers** and fill the bridge connection: ssh user +
+Cloudflare hostname/token pair, or ssh user + a directly reachable host (sshd
+port 22). Until then bots still work — only the desktop view stays off.
+
+## Notes
+
 ## Notes
 
 - Hardware: comfortable on 8 GB RAM; 6 GB allocated ceiling across daemons.

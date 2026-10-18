@@ -8,6 +8,36 @@ the SDK recipe index** — same discipline as the sibling packages.
 
 ## Design decisions not to re-litigate
 
+- **Screen bridge (v0.2.0:3) — the shared-netns fact is load-bearing.** All
+  daemons in this package share ONE network namespace (proven in prod by the
+  web→api `127.0.0.1:3100` proxy). That is why the bridge sidecar works with
+  ZERO app-side changes: its ssh -L 0.0.0.0:<port> forwards land on the same
+  loopback the web service dials for sealed screen URLs. Do not add a
+  hostname-rewrite preload "for safety" — it is unnecessary here and was
+  deliberately dropped (Claude's screen-rewrite.cjs survived review but not
+  the netns insight).
+- **Bridge connection config lives in store.json (`bridge*`), fed to the
+  bridge daemon as env.** CF fields → cloudflared access tcp mode; sshHost →
+  direct. Neither ⇒ bridge execs `sleep infinity` BY DESIGN (no crash loop;
+  health check treats sleep as healthy). The bridge ssh keypair is generated
+  by bridge.sh itself on the `bridge` volume iff absent, before the mode
+  check, so the Screen Bridge Setup action can always print it. Key rotation
+  = manual (delete bridge_key* on the volume, re-enroll).
+- **bridge volume is mounted ONLY into the bridge sub** (and its chown
+  oneshot), RW. Never mount it into api/web/worker.
+- **assets/shims/strip-foreign-dispatcher.cjs** mounts RO into api+worker,
+  loaded via NODE_OPTIONS=--require. Works around the openai@6.40/undici
+  UND_ERR_INVALID_ARG pairing bug on openai-compatible gateways (source
+  trace in the workspace RESEARCH). Tradeoff: drops upstream's SSRF DNS
+  host-pinning on that lane — noted in release notes. Remove when upstream
+  fixes the pairing (verify by unmounting + re-testing a gateway endpoint).
+- **Bridge known limitation:** a refused `ssh -O cancel` forfeits that local
+  port until the ssh mux bounces (mux bounce = full rebuild, next scan
+  retries refused forwards). Accepted for v1.
+- **Building needs qemu binfmt on the aarch64 lane** (bridge image RUN steps
+  execute foreign binaries). Register once per boot on the build host:
+  `docker run --rm --privileged tonistiigi/binfmt --install arm64`. That's a
+  host-kernel change — disclose it to the box owner when you use it.
 - **SANDBOX_PROVIDER=none means bots CANNOT converse** (verified live by
   Dylan 2026-10-18, source @f10b4ffd): createBot always attaches a computer
   (team-scope by default) and every run provisions it first; the none

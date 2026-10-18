@@ -55,6 +55,29 @@ const dict = {
   'The shared bearer token the supervisor on your remote host was started with (32+ characters). Re-enter only when rotating it.': 46,
   'Docker-remote needs the supervisor URL.': 47,
   'Docker-remote needs the supervisor token.': 48,
+  // actions/configureComputers.ts — screen bridge fields
+  'Bridge SSH user (desktop view/control)': 49,
+  'Docker-remote only: the ssh login on your Docker host the screen bridge connects as. Enables desktop view and click/type control. Pair with the Cloudflare fields or a directly reachable host below.': 50,
+  'Bridge SSH host (direct)': 51,
+  'A hostname or IP for the Docker host that this server can reach directly (LAN/VPN), sshd on port 22. Leave empty when connecting through Cloudflare instead. Changing it re-accepts host keys.': 52,
+  'Cloudflare SSH hostname': 53,
+  'A dedicated cloudflared ingress hostname that routes to sshd on the Docker host (service: ssh://localhost:22). Setting the three Cloudflare fields together selects the tunnel path.': 54,
+  'Cloudflare service token ID': 55,
+  'The Access service token client ID allowed to reach the SSH hostname.': 56,
+  'Cloudflare service token secret': 57,
+  'The matching service token secret. Leave empty to keep the stored one; re-enter when rotating it.': 58,
+  'A bridge connection needs the SSH user.': 59,
+  'Cloudflare also needs the token ID and secret.': 60,
+  'Choose one bridge path: Cloudflare fields or a direct host — not both.': 61,
+  // actions/bridgeSetup.ts
+  'Screen Bridge Setup': 62,
+  'Show the ssh public key to enroll on your computer host (Docker-remote). The bridge sidecar is what makes desktop view & control reach the StartOS box.': 63,
+  'Screen bridge setup': 64,
+  'The bridge key has not been generated yet. Start the Rakazo service once (any state works), then reopen this action.': 65,
+  'On your computer host (sandbox), once:\n\n1. Append the line below to `~/.ssh/authorized_keys` of the ssh user — one single line, no wrapping.\n2. Give that user Docker access (`sudo usermod -aG docker <user>`, then re-login).\n3. In the supervisor compose file set `network_mode: host` on the supervisor service and recreate it (lets its checks/control reach the desktops it starts).\n4. If the host is only reachable through Cloudflare: add a dedicated ssh route to your tunnel ingress (`service: ssh://localhost:22`) and an Access service token allowed on it, then fill the Cloudflare fields in the Bot Computers action (ssh user too). Directly reachable hosts need only ssh user + host there.': 66,
+  // main.ts — bridge daemon health
+  'Screen bridge is running': 67,
+  'Screen bridge is not running': 68,
   // init/seedFiles.ts
   'Choose the address Rakazo serves its web app on': 25,
 } as const
