@@ -101,3 +101,19 @@ the SDK recipe index** — same discipline as the sibling packages.
   unavailable"; bots need a provider. See the top design-decisions bullet.
 - Vite preview `--host 0.0.0.0` neighborly to the StartOS interface binding.
 - Whether anything calls the absent sandbox-supervisor URL at runtime anyway.
+
+## Upstream model-UX facts (verified in source @7d9cef3, 2026-10-19)
+
+- Model discovery already exists: the OpenAI-compatible connect form has a
+  "Find models" button (beneath base URL) that makes the server probe
+  `GET <base>/v1/models` with the Bearer key and turns the Model field into a
+  dropdown. It even falls back to the stored credential's key. Users who
+  never clicked it hand-type model ids.
+- One credential per (user, provider); one selected model per
+  (space, user, credential). A bot's model picker lists only connected
+  models + "Space default". Two models from ONE provider can't be live at
+  once; cross-provider concurrency is fine; Model backups = ordered failover
+  chain, not parallelism.
+- RAKAZO_OPENAI_COMPAT_ALLOW_PUBLIC=1 (Allow Public Endpoints action) gates
+  BOTH chat use and the Find-models probe of public gateways (e.g.
+  tokenfactory). If bots run, the flag is already on.
